@@ -40,7 +40,7 @@ power.t.test(n = 50, # 50 observations per group
 my.power <- function(n, sd, mean, dif, pvalue, iterations, seed){
   
   # make a vector to save the t-values of every iteration
-  vector <- c(rep(0, iterations))
+  vector <- c()
   
   # set seed
   set.seed(seed)
