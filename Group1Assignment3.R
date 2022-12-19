@@ -1,5 +1,137 @@
+## Assignment 3 
+## Pepijn Vink (6100252) and Kirsten van Kessel (6791220)
+
+# Load libraries
 library(tidyverse)
 library(permute) # for 'shuffle' function
+
+## Part 1
+
+# 1. Estimate the power using built in functions
+
+# make a (approximately normally distributed) control group  
+set.seed(679) # set seed 
+control <- rnorm(50, 150, 15) # n = 50, mean = 150, sd = 15
+
+# make (approximately normally distributed) experimental group 
+set.seed(679) # set seed  
+exp <- rnorm(50, 160, 15) # n = 50, mean = 160, sd = 15
+
+# perform a t-test to compare the control and experimental group 
+t.test(control, exp)
+
+# The difference between the groups is detected (p < 0.001).
+# The difference between the group means is exactly 10. 
+# This is because we use the same seed for both samples. 
+
+# perform test to determine power
+power.t.test(n = 50, # 50 observations per group
+             delta = 10, # true difference in means is 10
+             sd = 15, # standard deviation is 15
+             sig.level = 0.05, # alpha is 0.05
+             type = "two.sample", # two sample t-test
+             alternative = "two.sided") # two sided test
+
+# Power = 0.9099633.
+
+# 2. Estimate the power using simulation
+
+# Input:
+# n = group size.
+# sd = standard deviation of both groups.
+# mean = expected mean of one of the groups.
+# dif = expected difference between groups.
+# pvalue = alpha level. 0.05 is the default.
+# iterations = number of iterations.
+# seed = optional seed for generating samples.
+
+# Output: 
+# power = the power of the t-test.
+
+my.power <- function(n, sd, mean, dif, pvalue = 0.05, iterations, seed = NULL){
+  
+  # make a vector to save the p-values of every iteration
+  vector <- c()
+  
+  # set seed if specified
+  if (!is.null(seed)){
+    set.seed(seed)
+  }
+  
+  for(i in 1:iterations){
+    
+    # create groups
+    control <- rnorm(n, mean, sd)
+    exp <- rnorm(n, mean+dif, sd)
+    
+    # perform t-test
+    test <- t.test(control, exp)
+    
+    # save p-values in vector
+    vector[i] <- test$p.value
+  }
+  
+  # calculate power
+  # power is the part of significant results given that there is a difference in reality
+  power <- length(vector[vector<=pvalue]) / length(vector)
+  
+  # when calling the function, print the calculated power
+  return(power = power)
+}
+
+# test the function
+my.power(n = 50, 
+         sd = 15, 
+         mean = 150, 
+         dif = 10, 
+         pvalue = 0.05, 
+         iterations = 1000,
+         seed = 679)
+
+# my.power = 0.898; power.t.test = 0.9099633
+
+# The power of our power test is lower than the calculated power from the power.t.test function.
+# An explanation for this is that the sample is only taken 1000 times. 
+# As the power depends on the sample, and the sample is random, the power differs from the true power.
+# Increasing the iteration increases the reliability of the power function. 
+
+# test the function with 10000 iterations
+my.power(n = 50, 
+         sd = 15, 
+         mean = 150, 
+         dif = 10, 
+         pvalue = 0.05, 
+         iterations = 10000,
+         seed = 679)
+
+# my.power = 0.9038; power.t.test = 0.9099633
+
+# test the function with 100000 iterations
+my.power(n = 50, 
+         sd = 15, 
+         mean = 150, 
+         dif = 10, 
+         pvalue = 0.05, 
+         iterations = 100000,
+         seed = 679)
+
+# my.power = 0.90911; power.t.test = 0.9099633
+
+# test the function with 500000 iterations
+my.power(n = 50, 
+         sd = 15, 
+         mean = 150, 
+         dif = 10, 
+         pvalue = 0.05, 
+         iterations = 500000,
+         seed = 679)
+
+# my.power = 0.909308; power.t.test = 0.9099633
+
+# With our function we can get really close to the real power. 
+# However, this costs the computer more time.
+
+# Part 2
 # 1.
 
 # hypothesis.test performs an empirical t-test based on bootstrap or permutation resampling.
@@ -345,6 +477,15 @@ resampling.estimation <- function(Group1, Group2, method, seed = NULL, samples, 
 # run function on example data with bootstrap
 resampling.estimation(tfi, csfi, method = "bootstrap", seed = 42, samples = 10000, CI.type = "percentile")
 resampling.estimation(tfi,csfi, method = "bootstrap", seed = 42, samples = 10000, CI.type = "normal")
+# the percentile and the normal bootstrap have relatively similar confidence intervals.
 
 # run with jackknife
-resampling.estimation(tfi, csfi, method = "jackknife", seed = 29, samples = 10000)
+resampling.estimation(tfi, csfi, method = "jackknife", seed = 42, samples = 10000) # warning message works.
+# estimates differ quite a bit from those of the bootstrap. Especially estimates of bias are a lot more extreme than those in the bootstrap.
+
+# use different seed for jackknife
+resampling.estimation(tfi, csfi, method = "jackknife", seed = 24, samples = 10000)
+# estimates are already quite a bit different. This may be due to the small sample size.
+
+
+
