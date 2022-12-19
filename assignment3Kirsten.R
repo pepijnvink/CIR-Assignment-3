@@ -1,3 +1,10 @@
+## Assignment 3 
+## Pepijn Vink and Kirsten van Kessel
+
+## Part 1
+
+# 1. Estimate the power using built in functions
+
 # make a (approximately normally distributed) control group  
 set.seed(679) # set seed 
 control <- rnorm(50, 150, 15) # n = 50, mean = 150, sd = 15
@@ -23,7 +30,7 @@ power.t.test(n = 50, # 50 observations per group
 
 # Power = 0.9099633.
 
-# make a function to determine the power
+# 2. Estimate the power using simulation
 
 # Input:
 # n = group size
@@ -72,7 +79,7 @@ my.power(n = 50,
          mean = 150, 
          dif = 10, 
          pvalue = 0.05, 
-         iterations = 50000000,
+         iterations = 1000,
          seed = 679)
 
 # my.power = 0.898; power.t.test = 0.9099633
@@ -113,7 +120,7 @@ my.power(n = 50,
          iterations = 500000,
          seed = 679)
 
-# my.power = 0.9093; power.t.test = 0.9099633
+# my.power = 0.909308; power.t.test = 0.9099633
 
 # With our function we can get really close to the real power. 
 # However, this costs the computer more time. 
